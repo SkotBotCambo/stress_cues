@@ -1,0 +1,39 @@
+package com.example.stress_cues;
+
+import android.os.Bundle;
+import android.app.Activity;
+import android.util.Log;
+import android.view.Menu;
+import android.view.View;
+
+public class Likert_task extends Activity {
+	public String message = null;
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_likert_task);
+		Log.d("test", "Likert Q is called");
+		Bundle extras = getIntent().getExtras();
+		message = extras.getString("message");
+		Log.d("test","Message from likert_task is " + message);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.activity_likert_task, menu);
+		return true;
+	}
+	
+	public void onSubmitClick(View v){
+		Log.d("test", "Submit was clicked");
+		//message and likert answer are stored
+		
+	}
+	
+	public void onSkipClick(View v){
+		//destroy activity
+		finish();
+	}
+
+}

@@ -1,0 +1,3 @@
+INDEX VERSION 1.126+/Users/cambo/Documents/stress_cues/workspace/.metadata/.plugins/org.eclipse.jdt.core
+2400614027.index
+3208179777.index

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">stress_cues</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_sms_receiver">SmsReceiver</string>
+    <string name="title_activity_smsmonitor">SMSMonitor</string>
+    <string name="title_activity_service_controller">ServiceController</string>
+    <string name="thanks">Thank you for participating in the stress cues project</string>
+    <string name="stress_log">Stress Log</string>
+    <string name="title_activity_likert_task">Likert_task</string>
+    <string name="likert-2">Very Stressed</string>
+    <string name="likert-1">A little stressed</string>
+    <string name="likert0">neutral</string>
+    <string name="likert1">a little good</string>
+    <string name="likert2">Very good</string>
+    <string name="likertQ">How are you feeling right now?</string>
+
+</resources>
