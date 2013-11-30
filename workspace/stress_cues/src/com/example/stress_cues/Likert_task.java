@@ -12,6 +12,8 @@ import android.widget.RadioGroup;
 
 public class Likert_task extends Activity {
 	public String message = null;
+	public String partnerNumber = null;
+	public Long currTime;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -19,7 +21,11 @@ public class Likert_task extends Activity {
 		Log.d("test", "Likert Q is called");
 		Bundle extras = getIntent().getExtras();
 		message = extras.getString("message");
+		partnerNumber = extras.getString("partnerNumber");
+		currTime = extras.getLong("time");
 		Log.d("test","Message from likert_task is " + message);
+		long unixTime = System.currentTimeMillis() / 1000L;
+
 	}
 
 	@Override
@@ -50,15 +56,16 @@ public class Likert_task extends Activity {
 		}
 		Log.d("test", "radio button was " + selected);
 		//Store message, time, and likert value
-		long unixTime = System.currentTimeMillis() / 1000L;
-		Log.d("test", "Unix time is " + unixTime);
+		Log.d("test", "timeOfMessage : " + currTime);
 		//This stuff should go in a new method
 		
         Intent intent = new Intent(this,HttpService.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("message", message);
-        intent.putExtra("time", unixTime);
+        intent.putExtra("time", currTime);
         intent.putExtra("likert", selected);
+        intent.putExtra("partnerNumber", partnerNumber);
+        intent.putExtra("type", "sentWlikert");
         startService(intent);
         
 		this.finish();
@@ -67,6 +74,14 @@ public class Likert_task extends Activity {
 	public void onSkipClick(View v){
 		//destroy activity
 		Log.d("test", "skip was clicked");
+        Intent intent = new Intent(this,HttpService.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("message", message);
+        intent.putExtra("time", currTime);
+        intent.putExtra("likert", "");
+        intent.putExtra("partnerNumber", partnerNumber);
+        intent.putExtra("type", "sentWOlikert");
+        startService(intent);
 		this.finish();
 	}
 

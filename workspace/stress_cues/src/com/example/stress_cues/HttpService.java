@@ -7,9 +7,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,21 +25,29 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 public class HttpService extends Service {
 	public String message = null;
-	public Long time = null;
+	public String time = null;
 	public String likert = null;
-	private String urlString = "http://www.scottallencambo.com/test.php";
+	private String urlString = "http://www.scottallencambo.com/stress_study/stress.php";
+	public String thisNumber = null;
+	public String sent = null;
+	public String partnerNumber = null;
+	private String callType = null;
 	
   @Override
   public void onCreate() {
 	  Log.d("test","httpService created");
-    // TODO: Actions to perform when service is created.
+	  Context context = MainActivity.getAppContext();
+	  thisNumber = MainActivity.getNumber();
+	  Log.d("test", "This number = " + thisNumber);
   }
 
   @Override
@@ -61,9 +71,16 @@ public class HttpService extends Service {
 		Log.d("test", "HttpService is called");
 		Bundle extras = intent.getExtras();
 		message = extras.getString("message");
-		time = extras.getLong("time");
+		time = String.valueOf(extras.getLong("time"));
 		likert = extras.getString("likert");
-		Log.d("test","Message from likert_task is " + message);
+		partnerNumber = extras.getString("partnerNumber");
+		callType = extras.getString("type");
+		
+		Log.d("test","Message : " + message);
+		Log.d("test", "Time : " + time);
+		Log.d("test","Likert : " + likert);
+		Log.d("test", "partnerNumer : " + partnerNumber);
+		Log.d("test", "This number : " + thisNumber);
 		backgroundExecution();
   }
   
@@ -88,49 +105,22 @@ public class HttpService extends Service {
   
   //Method which does some processing in the background.
   private void backgroundThreadProcessing() {
-	  Log.d("test", "background thread has message " + message);
-	  Log.d("test", "background thread has time " + time);
-	  Log.d("test", "background thread has likert " + likert);
-	  
-	  Log.d("test", postData());
-	  
-	  
+	  //Log.d("test", "background thread has message " + message);
+	  ///Log.d("test", "background thread has time " + time);
+	  //Log.d("test", "background thread has likert " + likert);
+	  Log.d("test", "backgroundThreadProcessing : Type is " + callType);
+	  if (callType.equals("sentWlikert")){
+		  Log.d("test", postData_sentWlikert());
+	  } else if (callType.equals("sentWOlikert")){
+		  Log.d("test", postData_sentWOlikert());
+	  } else if (callType.equals("received")){
+		  Log.d("test", postData_received());
+	  }
 
-	  /**
-		try {
-			URL url = new URL("http://www.scottallencambo.com/test.php");
-			URLConnection connection = url.openConnection();
-			HttpURLConnection httpConnection = (HttpURLConnection) connection;
-			
-			int responseCode = httpConnection.getResponseCode();
-			if (responseCode == HttpURLConnection.HTTP_OK){
-				InputStream in = httpConnection.getInputStream();
-				if (in != null){
-					Log.d("test", "inputstream is not null");
-				}
-				//read inputStream
-				BufferedReader r = new BufferedReader(new InputStreamReader(in));
-				if (r != null){
-					Log.d("test", "r is not null");
-				}
-				StringBuilder total = new StringBuilder();
-				String line = "";
-				int count = 0;
-				while ((line = r.readLine()) != null) {
-				    total.append(line);
-				   Log.d("test","Count is " + count);
-				   count += 1;
-				}
-				Log.d("test", "Webpage says " + line);
-			}
-		} catch (IOException e) {
-			Log.d("Test", "IO Exception");
-		}
-		*/
   }
   
-  public String postData() {
-	  Log.d("test","postData() was called");
+  public String postData_sentWlikert() {
+	  Log.d("test","postData_sentWlikert() was called");
 	    // Create a new HttpClient and Post Header
 	    HttpClient httpclient = new DefaultHttpClient();
 	    HttpPost httppost = new HttpPost(urlString);
@@ -138,15 +128,79 @@ public class HttpService extends Service {
 	    try {
 	        // Add your data
 	        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-	        nameValuePairs.add(new BasicNameValuePair("id", "12345"));
-	        nameValuePairs.add(new BasicNameValuePair("stringdata", "AndDev is Cool!"));
+	        nameValuePairs.add(new BasicNameValuePair("thisNumber", thisNumber));
+	        nameValuePairs.add(new BasicNameValuePair("time", time));
+	        nameValuePairs.add(new BasicNameValuePair("message", message));
+	        nameValuePairs.add(new BasicNameValuePair("partnerNumber", partnerNumber));
+	        nameValuePairs.add(new BasicNameValuePair("sent", "sent"));
+	        nameValuePairs.add(new BasicNameValuePair("likert", likert));
 	        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
 	        // Execute HTTP Post Request
 	        HttpResponse response = httpclient.execute(httppost);
 	        fromPage = inputStreamToString(response.getEntity().getContent());
 	    } catch (ClientProtocolException e) {
+	        // TODO Auto-generated catch block	
+	    	Log.d("test", "ClienProtocol Exception" + e);
+	    } catch (IOException e) {
+	    	Log.d("test","IOException " + e);
 	        // TODO Auto-generated catch block
+	    }
+	    return fromPage;
+	}
+  public String postData_sentWOlikert() {
+	  Log.d("test","postData_sentWOlikert() was called");
+	    // Create a new HttpClient and Post Header
+	    HttpClient httpclient = new DefaultHttpClient();
+	    HttpPost httppost = new HttpPost(urlString);
+	    String fromPage = "nothing";
+	    try {
+	        // Add your data
+	        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+	        nameValuePairs.add(new BasicNameValuePair("thisNumber", thisNumber));
+	        nameValuePairs.add(new BasicNameValuePair("time", time));
+	        nameValuePairs.add(new BasicNameValuePair("message", message));
+	        nameValuePairs.add(new BasicNameValuePair("partnerNumber", partnerNumber));
+	        nameValuePairs.add(new BasicNameValuePair("sent", "sent"));
+	        if (!(likert.equals("None"))){
+		        nameValuePairs.add(new BasicNameValuePair("likert", likert));
+	        }
+	        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+	        // Execute HTTP Post Request
+	        HttpResponse response = httpclient.execute(httppost);
+	        fromPage = inputStreamToString(response.getEntity().getContent());
+	    } catch (ClientProtocolException e) {
+	        // TODO Auto-generated catch block	
+	    	Log.d("test", "ClienProtocol Exception" + e);
+	    } catch (IOException e) {
+	    	Log.d("test","IOException " + e);
+	        // TODO Auto-generated catch block
+	    }
+	    return fromPage;
+	} 
+  
+  public String postData_received() {
+	  Log.d("test","postreceived() was called");
+	    // Create a new HttpClient and Post Header
+	    HttpClient httpclient = new DefaultHttpClient();
+	    HttpPost httppost = new HttpPost(urlString);
+	    String fromPage = "nothing";
+	    try {
+	        // Add your data
+	        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+	        nameValuePairs.add(new BasicNameValuePair("thisNumber", thisNumber));
+	        nameValuePairs.add(new BasicNameValuePair("time", time));
+	        nameValuePairs.add(new BasicNameValuePair("message", message));
+	        nameValuePairs.add(new BasicNameValuePair("partnerNumber", partnerNumber));
+	        nameValuePairs.add(new BasicNameValuePair("received", "received"));
+	        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+	        // Execute HTTP Post Request
+	        HttpResponse response = httpclient.execute(httppost);
+	        fromPage = inputStreamToString(response.getEntity().getContent());
+	    } catch (ClientProtocolException e) {
+	        // TODO Auto-generated catch block	
 	    	Log.d("test", "ClienProtocol Exception" + e);
 	    } catch (IOException e) {
 	    	Log.d("test","IOException " + e);
